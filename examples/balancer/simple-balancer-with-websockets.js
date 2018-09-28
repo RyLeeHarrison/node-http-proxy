@@ -24,15 +24,16 @@
 
 */
 
-var http = require('http'),
-    httpProxy = require('../../lib/http-proxy');
+const http = require('http');
+
+const httpProxy = require('../../lib/http-proxy');
 
 //
 // A simple round-robin load balancing strategy.
 //
 // First, list the servers you want to use in your rotation.
 //
-var addresses = [
+const addresses = [
   {
     host: 'ws1.0.0.0',
     port: 80
@@ -47,11 +48,9 @@ var addresses = [
 // Create a HttpProxy object for each target
 //
 
-var proxies = addresses.map(function (target) {
-  return new httpProxy.createProxyServer({
-    target: target
-  });
-});
+const proxies = addresses.map(target => new httpProxy.createProxyServer({
+  target
+}));
 
 //
 // Get the proxy at the front of the array, put it at the end and return it
@@ -59,7 +58,7 @@ var proxies = addresses.map(function (target) {
 //
 
 function nextProxy() {
-  var proxy = proxies.shift();
+  const proxy = proxies.shift();
   proxies.push(proxy);
   return proxy;
 }
@@ -68,7 +67,7 @@ function nextProxy() {
 // Get the 'next' proxy and send the http request
 //
 
-var server = http.createServer(function (req, res) {
+const server = http.createServer((req, res) => {
   nextProxy().web(req, res);
 });
 
@@ -76,7 +75,7 @@ var server = http.createServer(function (req, res) {
 // Get the 'next' proxy and send the upgrade request
 //
 
-server.on('upgrade', function (req, socket, head) {
+server.on('upgrade', (req, socket, head) => {
   nextProxy().ws(req, socket, head);
 });
 
